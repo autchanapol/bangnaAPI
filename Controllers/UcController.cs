@@ -24,10 +24,10 @@ namespace bangnaAPI.Controllers
         }
 
         // GET: api/uc
-        [HttpGet]
+        [HttpGet("GetUc")]
         public async Task<IActionResult> GetAll()
         {
-            var ucs = await _bangna1Context.Ucs.ToListAsync();
+            var ucs = await _bangna1Context.Ucs.Select(uc => new { uc.Id,uc.Name,uc.Remarks,uc.Status   }).ToArrayAsync();
             return Ok(ucs);
         }
 
