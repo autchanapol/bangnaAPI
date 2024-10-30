@@ -14,9 +14,9 @@ namespace bangnaAPI.Controllers
     [Route("api/[controller]")]
     public class WardsController : Controller
     {
-        private readonly db_bangna1Context _context;
+        private readonly Data.db_bangna1Context _context;
 
-        public WardsController(db_bangna1Context context)
+        public WardsController(Data.db_bangna1Context context)
         {
             _context = context;
         }
@@ -39,6 +39,103 @@ namespace bangnaAPI.Controllers
             return Ok(ucs);
         }
 
+
+        [HttpPost("InsertWard")]
+        public async Task<IActionResult> InsertWard([FromBody] Ward wardDto)
+        {
+            if (wardDto == null)
+            {
+                return BadRequest("Invalid Ward data.");
+            }
+
+            // สร้าง object ของ Ward เพื่อแปลงข้อมูล
+            var newWard = new Ward
+            {
+                WardName = wardDto.WardName,
+                Remarks = wardDto.Remarks,
+                Status = wardDto.Status ?? 1, // ถ้า Status ไม่ถูกส่งมาจะตั้งเป็น 1
+                CreatedBy = wardDto.CreatedBy, // กำหนดค่าผู้สร้าง (กำหนดเองหรือรับจาก token/auth)
+                CreatedDate = DateTime.Now, // วันที่สร้าง
+            };
+
+            // เพิ่มข้อมูลลงในตาราง Wards
+           
+
+            try
+            {
+                _context.Wards.Add(newWard);
+                await _context.SaveChangesAsync(); // บันทึกข้อมูลลงฐานข้อมูล
+
+                // ส่ง response กลับมาพร้อมกับ Ward.Id
+                return Ok(new
+                {
+                    success = true,
+                    message = "Ward inserted successfully.",
+                    wardId = newWard.Id // ส่ง Ward.Id ที่ถูกสร้างกลับมา
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("UpdateWard")]
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateWard([Bind("Id,WardName,Remarks,Status,CreatedBy,CreatedDate,UpdateBy,LastUpdate")] Ward ward)
+        {
+            // ตรวจสอบว่ามีการส่งค่า Id มาหรือไม่
+            if (ward.Id == 0) // หรือใช้การตรวจสอบอื่นตามที่เหมาะสม
+            {
+                return BadRequest("Invalid Ward Id.");
+            }
+
+            // ดึงข้อมูล Ward เดิมจากฐานข้อมูล
+            var existingWard = await _context.Wards.FindAsync(ward.Id);
+
+            if (existingWard == null)
+            {
+                return NotFound("Ward not found");
+            }
+
+            // อัปเดตเฉพาะฟิลด์ที่ส่งมา
+            if (!string.IsNullOrEmpty(ward.WardName))
+            {
+                existingWard.WardName = ward.WardName;
+            }
+
+            if (!string.IsNullOrEmpty(ward.Remarks))
+            {
+                existingWard.Remarks = ward.Remarks;
+            }
+
+            if (ward.Status.HasValue)
+            {
+                existingWard.Status = ward.Status;
+            }
+
+            existingWard.UpdateBy = ward.UpdateBy;
+            existingWard.LastUpdate = DateTime.Now;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return Ok(new
+                {
+                    success = true,
+                    message = "Ward updated successfully.",
+                    wardId = existingWard.Id
+                });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return StatusCode(500, "An error occurred during the update.");
+            }
+        }
+
+
+
+
         // GET: Wards/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -56,6 +153,8 @@ namespace bangnaAPI.Controllers
 
             return View(ward);
         }
+
+
 
         // GET: Wards/Create
         public IActionResult Create()

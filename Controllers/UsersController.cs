@@ -14,9 +14,9 @@ namespace bangnaAPI.Controllers
     [Route("api/[controller]")]
     public class UsersController : Controller
     {
-        private readonly db_bangna1Context _context;
+        private readonly Data.db_bangna1Context _context;
 
-        public UsersController(db_bangna1Context context)
+        public UsersController(Data.db_bangna1Context context)
         {
             _context = context;
         }

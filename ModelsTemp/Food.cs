@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace bangnaAPI.Models
+namespace bangnaAPI.ModelsTemp
 {
-    public partial class Bed
+    public partial class Food
     {
         public int Id { get; set; }
-        public string? Name { get; set; }
-        public int? WardId { get; set; }
-        public string? Remarks { get; set; }
+        public string? FoodName { get; set; }
         public int? Status { get; set; }
-        public int? Actived { get; set; }
         public int? CreatedBy { get; set; }
         public DateTime? CreatedDate { get; set; }
         public int? UpdateBy { get; set; }

@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using bangnaAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace bangnaAPI.Data
+namespace bangnaAPI.Models
 {
     public partial class db_bangna1Context : DbContext
     {
@@ -29,8 +28,7 @@ namespace bangnaAPI.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("DefaultConnection");
+                optionsBuilder.UseSqlServer("Name=DefaultConnection");
             }
         }
 
@@ -41,6 +39,8 @@ namespace bangnaAPI.Data
                 entity.ToTable("bed");
 
                 entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.Actived).HasColumnName("actived");
 
                 entity.Property(e => e.CreatedBy).HasColumnName("created_by");
 
@@ -208,6 +208,13 @@ namespace bangnaAPI.Data
                 entity.Property(e => e.Role).HasColumnName("role");
 
                 entity.Property(e => e.Status).HasColumnName("status");
+
+                entity.Property(e => e.StatusActive).HasColumnName("status_active");
+
+                entity.Property(e => e.UpdateBy)
+                    .HasMaxLength(10)
+                    .HasColumnName("update_by")
+                    .IsFixedLength();
 
                 entity.Property(e => e.Username)
                     .HasMaxLength(50)

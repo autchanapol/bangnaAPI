@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace bangnaAPI.Models
+namespace bangnaAPI.ModelsTemp
 {
     public partial class User
     {
