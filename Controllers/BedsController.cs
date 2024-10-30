@@ -107,7 +107,7 @@ namespace bangnaAPI.Controllers
         {
             if (bed.Id == 0) // หรือใช้การตรวจสอบอื่นตามที่เหมาะสม
             {
-                return BadRequest("Invalid Ward Id.");
+                return BadRequest("Invalid Bed Id.");
             }
 
             var existingBed = await _context.Beds.FindAsync(bed.Id);
@@ -115,12 +115,14 @@ namespace bangnaAPI.Controllers
             {
                 return NotFound("Bed not found");
             }
-
-            // ตรวจสอบว่า WardId มีอยู่ในฐานข้อมูลหรือไม่
-            var wardExists = await _context.Wards.AnyAsync(wd => wd.Id == bed.WardId);
-            if (!wardExists)
+            if (bed.WardId.HasValue)
             {
-                return BadRequest("Invalid WardId. Ward does not exist.");
+                // ตรวจสอบว่า WardId มีอยู่ในฐานข้อมูลหรือไม่
+                var wardExists = await _context.Wards.AnyAsync(wd => wd.Id == bed.WardId);
+                if (!wardExists)
+                {
+                    return BadRequest("Invalid WardId. Ward does not exist.");
+                }
             }
 
             if (!string.IsNullOrEmpty(bed.Name))
@@ -135,6 +137,10 @@ namespace bangnaAPI.Controllers
             {
                 existingBed.WardId = bed.WardId;
             }
+            if (bed.Status.HasValue)
+            {
+                existingBed.Status = bed.Status;
+            }
             existingBed.UpdateBy = bed.UpdateBy;
             existingBed.LastUpdate = DateTime.Now;
             try
@@ -144,7 +150,7 @@ namespace bangnaAPI.Controllers
                 {
                     success = true,
                     message = "Bed updated successfully.",
-                    wardId = existingBed.Id
+                    bedId = existingBed.Id
                 });
             }
             catch (DbUpdateConcurrencyException)
