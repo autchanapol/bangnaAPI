@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using bangnaAPI.Data;
+using bangnaAPI.Models;
 
 namespace bangnaAPI.Controllers
 {

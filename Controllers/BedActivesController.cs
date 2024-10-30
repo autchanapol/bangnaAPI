@@ -12,9 +12,9 @@ namespace bangnaAPI.Controllers
 {
     public class BedActivesController : Controller
     {
-        private readonly Data.db_bangna1Context _context;
+        private readonly db_bangna1Context _context;
 
-        public BedActivesController(Data.db_bangna1Context context)
+        public BedActivesController(db_bangna1Context context)
         {
             _context = context;
         }

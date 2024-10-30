@@ -14,9 +14,9 @@ namespace bangnaAPI.Controllers
     [Route("api/[controller]")]
     public class WardsController : Controller
     {
-        private readonly Data.db_bangna1Context _context;
+        private readonly db_bangna1Context _context;
 
-        public WardsController(Data.db_bangna1Context context)
+        public WardsController(db_bangna1Context context)
         {
             _context = context;
         }
