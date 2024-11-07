@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using bangnaAPI.Data;
 using bangnaAPI.Models;
 using System.Xml.Linq;
+
+
 namespace bangnaAPI.Controllers
 {
     [ApiController]
@@ -57,6 +59,22 @@ namespace bangnaAPI.Controllers
             return Ok(bedData);
         }
 
+
+        [HttpGet("GetBedsFrmWard")]
+        public async Task<IActionResult> GetBedsFrmWard(int wardId)
+        {
+            var bedData = await (from bed in _context.Beds
+                                 join ward in _context.Wards on bed.WardId equals ward.Id
+                                 where bed.Status == 1 && bed.WardId == wardId && (bed.Actived ?? 0) == 0
+                                 select new
+                                 {
+                                     bed.Id,
+                                     bed.Name
+                                 }).ToListAsync();
+
+            return Ok(bedData);
+        }
+
         [HttpPost("InsertBed")]
         public async Task<IActionResult> InsertBed([FromBody] Bed bedDto)
         {
@@ -78,6 +96,7 @@ namespace bangnaAPI.Controllers
                 WardId = bedDto.WardId,
                 Remarks = bedDto.Remarks,
                 Status = 1,
+                Actived = 0,
                 CreatedBy = bedDto.CreatedBy,
                 CreatedDate = DateTime.Now
             };

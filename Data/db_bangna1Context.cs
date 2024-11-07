@@ -94,6 +94,10 @@ namespace bangnaAPI.Data
                     .HasColumnType("datetime")
                     .HasColumnName("last_update");
 
+                entity.Property(e => e.Remarks)
+                    .HasMaxLength(255)
+                    .HasColumnName("remarks");
+
                 entity.Property(e => e.Status).HasColumnName("status");
 
                 entity.Property(e => e.UdId).HasColumnName("ud_id");

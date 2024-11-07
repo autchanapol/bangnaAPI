@@ -24,11 +24,17 @@ namespace bangnaAPI.Controllers
             _bangna1Context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
+
+
+
         // GET: api/uc
         [HttpGet("GetUc")]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetUc()
         {
-            var ucs = await _bangna1Context.Ucs.Select(uc => new { uc.Id,uc.Name,uc.Remarks,uc.Status   }).ToArrayAsync();
+            var ucs = await (from uc in _bangna1Context.Ucs 
+                             where uc.Status == 1
+                             select new { uc.Id,uc.Name } ).ToListAsync();
+                             //Select(uc => new { uc.Id,uc.Name  }).ToArrayAsync();
             return Ok(ucs);
         }
 
