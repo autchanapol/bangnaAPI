@@ -156,6 +156,34 @@ namespace bangnaAPI.Controllers
             }
         }
 
+
+        [HttpGet("GetBedsActivefrmDate")]
+        public async Task<IActionResult> GetBedsActive(DateTime dataOrder, int WardId)
+        {
+            var bedActiveData = await (from bedActive in _context.BedActives
+                                       join bed in _context.Beds on bedActive.BedId equals bed.Id
+                                       join ward in _context.Wards on bed.WardId equals ward.Id
+                                       join uc in _context.Ucs on bedActive.UdId equals uc.Id
+                                       where bedActive.Status == 1 && ward.Id == WardId
+                                       && !_context.OrderFoods // NOT IN
+                                       .Where(of => EF.Functions.DateDiffDay(of.CreatedDate, dataOrder) == 0 && of.Status == 1)
+                                       .Select(of => of.BedActiveId)
+                                       .Contains(bedActive.Id) // WHERE bedActive.Id
+                                       select new
+                                       {
+                                           bedActive.Id,
+                                           bedActive.BedId,
+                                           bedName = bed.Name,
+                                           bedActive.UdId,
+                                           UdName = uc.Name,
+                                           WardId = ward.Id,
+                                           WardName = ward.WardName,
+                                       }
+                                        ).ToListAsync();
+
+            return Ok(bedActiveData);
+        }
+
         // GET: BedActives/Details/5
         public async Task<IActionResult> Details(int? id)
         {
