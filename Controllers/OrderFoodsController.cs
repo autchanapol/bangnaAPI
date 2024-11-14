@@ -67,6 +67,7 @@ namespace bangnaAPI.Controllers
                                            patient = bedActive.HnName,
                                            foodId = foods.Id,
                                            foodName = foods.FoodName,
+                                           orderFood.Remarks,
                                            CreatedDate = orderFood.CreatedDate.HasValue
                                            ? orderFood.CreatedDate.Value.ToString("dd-MM-yyyy HH:mm")
                                        : null
