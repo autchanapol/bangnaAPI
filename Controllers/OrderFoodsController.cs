@@ -9,9 +9,11 @@ using bangnaAPI.Data;
 using bangnaAPI.Models;
 using Newtonsoft.Json.Linq;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 
 namespace bangnaAPI.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class OrderFoodsController : Controller
@@ -37,7 +39,7 @@ namespace bangnaAPI.Controllers
             return View();
         }
 
-
+        
         [HttpGet("GetOrderFoodfrmDate")]
         public async Task<IActionResult> GetOrderFood(DateTime startData, DateTime endData)
         {

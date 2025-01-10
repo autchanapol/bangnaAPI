@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using bangnaAPI.Data;
 using bangnaAPI.Models;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace bangnaAPI.Controllers
 {
@@ -14,19 +18,20 @@ namespace bangnaAPI.Controllers
     [Route("api/[controller]")]
     public class UsersController : Controller
     {
+        private readonly IConfiguration _configuration;
         private readonly db_bangna1Context _context;
-
-        public UsersController(db_bangna1Context context)
+        public UsersController(IConfiguration configuration, db_bangna1Context context)
         {
+            _configuration = configuration;
             _context = context;
         }
 
         // GET: Users
         public async Task<IActionResult> Index()
         {
-              return _context.Users != null ? 
-                          View(await _context.Users.ToListAsync()) :
-                          Problem("Entity set 'db_bangna1Context.Users'  is null.");
+            return _context.Users != null ?
+                        View(await _context.Users.ToListAsync()) :
+                        Problem("Entity set 'db_bangna1Context.Users'  is null.");
         }
 
         // GET: Users/Details/5
@@ -101,14 +106,39 @@ namespace bangnaAPI.Controllers
 
             if (user != null)
             {
-                // การเข้าสู่ระบบสำเร็จ
+                // สร้าง JWT Token
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.UTF8.GetBytes(_configuration["JwtConfig:SecretKey"]); // ดึง SecretKey จาก appsettings.json
+
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Name),
+                new Claim(ClaimTypes.Role, user.Role.ToString())
+            }),
+                    Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["JwtConfig:TokenValidityMins"])),
+                    Issuer = _configuration["JwtConfig:Issuer"],
+                    Audience = _configuration["JwtConfig:Audience"],
+                    SigningCredentials = new SigningCredentials(
+                new SymmetricSecurityKey(key),
+                SecurityAlgorithms.HmacSha256Signature)
+                };
+
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+                var tokenString = tokenHandler.WriteToken(token);
+
+                // ส่ง Token กลับไปยัง Client
+
                 return Ok(new
                 {
                     success = true,
                     message = "Login successful.",
                     userId = user.Id,
                     name = user.Name,
-                    role = user.Role
+                    role = user.Role,
+                    token = tokenString
                 });
             }
             else
@@ -122,13 +152,6 @@ namespace bangnaAPI.Controllers
                     role = 0
                 });
             }
-
-            // หากไม่พบผู้ใช้
-            //return Unauthorized(new
-            //{
-            //    success = false,
-            //    message = "Invalid username or password."
-            //});
         }
 
         // โมเดลสำหรับการร้องขอข้อมูลการเข้าสู่ระบบ
@@ -216,14 +239,14 @@ namespace bangnaAPI.Controllers
             {
                 _context.Users.Remove(user);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool UserExists(int id)
         {
-          return (_context.Users?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Users?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

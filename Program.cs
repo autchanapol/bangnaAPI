@@ -1,5 +1,9 @@
 ﻿using bangnaAPI.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +25,34 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        // เปิดการตรวจสอบ Issuer และ Audience
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+
+        // กำหนดค่าที่ใช้ตรวจสอบ
+        ValidIssuer = builder.Configuration["JwtConfig:Issuer"],
+        ValidAudience = builder.Configuration["JwtConfig:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(builder.Configuration["JwtConfig:SecretKey"])
+        )
+    };
+});
+
+builder.Services.AddAuthorization();
+
 // เชื่อมต่อกับฐานข้อมูลโดยใช้ Connection String
 builder.Services.AddDbContext<db_bangna1Context>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
@@ -39,7 +71,7 @@ app.UseHttpsRedirection();
 
 // เรียกใช้งาน CORS ใน pipeline
 app.UseCors("AllowAllOrigins");
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

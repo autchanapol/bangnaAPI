@@ -4,9 +4,11 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using bangnaAPI.Data;
 using bangnaAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace bangnaAPI.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class UcController : Controller
